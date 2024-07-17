@@ -3,69 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sohaib's Portfolio</title>
+    <title>Sohaib Ahmer's Portfolio</title>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
+        body, html {
             margin: 0;
             padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
         }
-
-        header {
-            background-color: #212f3d;
+        #pdfContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        .fullscreen-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px 20px;
+            background-color: #e50914;
             color: white;
-            padding: 20px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: none;
+            cursor: pointer;
+            z-index: 1000;
         }
-
-        h1 {
-            margin: 0;
-            font-size: 1.5em;
-        }
-
-        main {
-            padding: 20px;
-            width: 100%;
-            max-width: 800px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            background: white;
-            border-radius: 8px;
-        }
-
-        embed {
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
-
-        footer {
-            margin-top: auto;
-            background-color: #212f3d;
-            color: white;
-            padding: 10px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+        .fullscreen-button:hover {
+            background-color: #f40612;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Sohaib's Portfolio</h1>
-    </header>
-    <main>
-        <embed src="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" type="application/pdf" width="100%" height="600px" />
-    </main>
-    <footer>
-        &copy; 2024 Sohaib Ahmer
-    </footer>
+    <button class="fullscreen-button" onclick="openFullscreen()">Full Screen</button>
+    <div id="pdfContainer">
+        <embed src="Portfolio_compressed.pdf" type="application/pdf" width="100%" height="100%" />
+    </div>
+
+    <script>
+        function openFullscreen() {
+            var elem = document.getElementById("pdfContainer");
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.mozRequestFullScreen) { // Firefox
+                elem.mozRequestFullScreen();
+            } else if (elem.webkitRequestFullscreen) { // Chrome, Safari and Opera
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { // IE/Edge
+                elem.msRequestFullscreen();
+            }
+        }
+    </script>
 </body>
 </html>
