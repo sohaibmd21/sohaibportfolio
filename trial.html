@@ -60,7 +60,6 @@
         let pageNum = 1;
         let pageRendering = false;
         let pageNumPending = null;
-        const scale = 1.5; // Adjust scale as needed
         const canvas = document.getElementById('pdfCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -84,11 +83,15 @@
                         renderPage(pageNumPending, scale);
                         pageNumPending = null;
                     }
+                }).catch(function(error) {
+                    console.error('Error rendering page:', error);
                 });
+            }).catch(function(error) {
+                console.error('Error getting page:', error);
             });
         }
 
-        function queueRenderPage(num) {
+        function queueRenderPage(num, scale) {
             if (pageRendering) {
                 pageNumPending = num;
             } else {
@@ -99,22 +102,21 @@
         function onDocumentLoad() {
             pdfjsLib.getDocument(url).promise.then(function(pdf) {
                 pdfDoc = pdf;
-                renderPage(pageNum, scale);
+                renderPage(pageNum, 1.5); // Initial scale for normal view
             }).catch(function(error) {
                 console.error('Error loading PDF:', error);
             });
         }
 
         function toggleFullscreen() {
-            const pdfContainer = document.getElementById('pdfContainer');
             const isFullscreen = !!document.fullscreenElement;
 
             if (isFullscreen) {
                 document.exitFullscreen();
-                renderPage(pageNum, scale); // Render at normal scale
+                queueRenderPage(pageNum, 1.5); // Render at normal scale
             } else {
                 document.documentElement.requestFullscreen?.() || document.documentElement.mozRequestFullScreen?.() || document.documentElement.webkitRequestFullscreen?.() || document.documentElement.msRequestFullscreen?.();
-                renderPage(pageNum, scale * 1.5); // Render at higher scale for fullscreen
+                queueRenderPage(pageNum, 2.0); // Render at higher scale for fullscreen
             }
         }
 
