@@ -51,6 +51,59 @@
     </div>
 
     <script>
+        const url = 'Portfolio.pdf'; // Path to your PDF file
+
+        // PDF.js configuration
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://mozilla.github.io/pdf.js/build/pdf.worker.js';
+
+        let pdfDoc = null;
+        let pageNum = 1;
+        let pageRendering = false;
+        let pageNumPending = null;
+        const scale = 1.12;
+        const canvas = document.getElementById('pdfCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function renderPage(num) {
+            pageRendering = true;
+
+            pdfDoc.getPage(num).then(function(page) {
+                const viewport = page.getViewport({ scale });
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                const renderContext = {
+                    canvasContext: ctx,
+                    viewport: viewport
+                };
+                const renderTask = page.render(renderContext);
+
+                renderTask.promise.then(function() {
+                    pageRendering = false;
+                    if (pageNumPending !== null) {
+                        renderPage(pageNumPending);
+                        pageNumPending = null;
+                    }
+                });
+            });
+        }
+
+        function queueRenderPage(num) {
+            if (pageRendering) {
+                pageNumPending = num;
+            } else {
+                renderPage(num);
+            }
+        }
+
+        function onDocumentLoad() {
+            pdfjsLib.getDocument(url).promise.then(function(pdf) {
+                pdfDoc = pdf;
+                renderPage(pageNum);
+            });
+        }
+
         function toggleFullscreen() {
             const pdfContainer = document.getElementById('pdfContainer');
             const isFullscreen = !!document.fullscreenElement;
@@ -68,6 +121,8 @@
         document.addEventListener('fullscreenchange', () => {
             document.querySelector('.fullscreen-button').style.display = document.fullscreenElement ? 'none' : 'block';
         });
+
+        document.addEventListener('DOMContentLoaded', onDocumentLoad);
     </script>
     <!-- Include the new JavaScript file -->
     <script src="pdf-navigation.js"></script>
