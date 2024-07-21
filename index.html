@@ -54,6 +54,14 @@
                 elem.msRequestFullscreen();
             }
         }
+
+        document.addEventListener('fullscreenchange', (event) => {
+            if (document.fullscreenElement) {
+                document.querySelector('.fullscreen-button').style.display = 'none';
+            } else {
+                document.querySelector('.fullscreen-button').style.display = 'block';
+            }
+        });
     </script>
 </body>
 </html>
