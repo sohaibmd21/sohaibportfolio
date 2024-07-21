@@ -10,57 +10,46 @@
             padding: 0;
             height: 100%;
             overflow: hidden;
-            background-color: #000;
+            background: #000;
         }
         #pdfContainer {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
         }
         .fullscreen-button {
             position: absolute;
             bottom: 10px;
             right: 10px;
             padding: 10px 20px;
-            background-color: #e50914;
-            color: white;
+            background: #e50914;
+            color: #fff;
             border: none;
             cursor: pointer;
             z-index: 1000;
         }
         .fullscreen-button:hover {
-            background-color: #f40612;
+            background: #f40612;
         }
     </style>
 </head>
 <body>
-    <button class="fullscreen-button" onclick="openFullscreen()">Full Screen</button>
+    <button class="fullscreen-button" onclick="toggleFullscreen()">Full Screen</button>
     <div id="pdfContainer">
-        <embed src="Portfolio.pdf" type="application/pdf" width="100%" height="100%" />
+        <embed id="pdfEmbed" src="Portfolio.pdf" type="application/pdf" width="100%" height="100%" />
     </div>
 
     <script>
-        function openFullscreen() {
-            var elem = document.querySelector("#pdfContainer embed");
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen();
-            } else if (elem.mozRequestFullScreen) { // Firefox
-                elem.mozRequestFullScreen();
-            } else if (elem.webkitRequestFullscreen) { // Chrome, Safari and Opera
-                elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) { // IE/Edge
-                elem.msRequestFullscreen();
+        function toggleFullscreen() {
+            const elem = document.documentElement; // Full screen mode for the entire document
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                elem.requestFullscreen?.() || elem.mozRequestFullScreen?.() || elem.webkitRequestFullscreen?.() || elem.msRequestFullscreen?.();
             }
         }
 
-        document.addEventListener('fullscreenchange', (event) => {
-            if (document.fullscreenElement) {
-                document.querySelector('.fullscreen-button').style.display = 'none';
-            } else {
-                document.querySelector('.fullscreen-button').style.display = 'block';
-            }
+        document.addEventListener('fullscreenchange', () => {
+            document.querySelector('.fullscreen-button').style.display = document.fullscreenElement ? 'none' : 'block';
         });
     </script>
 </body>
