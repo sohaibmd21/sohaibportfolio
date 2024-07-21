@@ -3,33 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sohaib Portfolio</title>
+    <title>Open PDF in New Tab</title>
     <style>
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
-            overflow: hidden;
-            background: #000;
-        }
-        #pdfViewer {
-            position: absolute;
-            inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 100%;
-            height: 100%;
+            background: #000;
         }
-        iframe {
-            border: none;
-            width: 100%;
-            height: 100%;
-        }
-        .fullscreen-button {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
+        .open-button {
             padding: 10px 20px;
             background: #e50914;
             color: #fff;
@@ -37,70 +22,20 @@
             cursor: pointer;
             z-index: 1000;
         }
-        .fullscreen-button:hover {
+        .open-button:hover {
             background: #f40612;
         }
     </style>
 </head>
 <body>
-    <button class="fullscreen-button" onclick="toggleFullscreen()">Full Screen</button>
-    <div id="pdfViewer">
-        <iframe id="pdfIframe" src="web/viewer.html?file=Portfolio.pdf" type="application/pdf"></iframe>
-    </div>
-
-    <!-- Include PDF.js and viewer scripts from CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.0.0/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.0.0/pdf.worker.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.0.0/pdf_viewer.min.js"></script>
+    <button class="open-button" onclick="openPdf()">Open PDF</button>
 
     <script>
-        // Initialize PDF.js viewer
-        const url = 'Portfolio.pdf';
-
-        // Load the PDF document
-        pdfjsLib.getDocument(url).promise.then(pdf => {
-            // Fetch the first page
-            pdf.getPage(1).then(page => {
-                const scale = 1.5;
-                const viewport = page.getViewport({ scale });
-
-                // Prepare canvas using PDF page dimensions
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-
-                // Append canvas to the viewer
-                const pdfViewer = document.getElementById('pdfViewer');
-                pdfViewer.innerHTML = '';
-                pdfViewer.appendChild(canvas);
-
-                // Render PDF page into canvas context
-                const renderContext = {
-                    canvasContext: context,
-                    viewport: viewport
-                };
-                page.render(renderContext);
-            });
-        });
-
-        function toggleFullscreen() {
-            const pdfViewer = document.getElementById('pdfViewer');
-            const isFullscreen = !!document.fullscreenElement;
-
-            if (isFullscreen) {
-                document.exitFullscreen();
-                pdfViewer.style.transform = 'none'; // Reset zoom
-            } else {
-                document.documentElement.requestFullscreen?.() || document.documentElement.mozRequestFullScreen?.() || document.documentElement.webkitRequestFullscreen?.() || document.documentElement.msRequestFullscreen?.();
-                pdfViewer.style.transform = 'scale(1.12)'; // Apply zoom
-                pdfViewer.style.transformOrigin = 'center'; // Center the PDF
-            }
+        function openPdf() {
+            const pdfUrl = 'Portfolio.pdf';
+            const viewerUrl = 'pdfjs/web/viewer.html?file=' + encodeURIComponent(pdfUrl);
+            window.open(viewerUrl, '_blank');
         }
-
-        document.addEventListener('fullscreenchange', () => {
-            document.querySelector('.fullscreen-button').style.display = document.fullscreenElement ? 'none' : 'block';
-        });
     </script>
 </body>
 </html>
