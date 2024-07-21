@@ -18,13 +18,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: transform 0.3s ease;
         }
         iframe {
             border: none;
-            width: 112vw; /* 112% of the viewport width */
-            height: 112vh; /* 112% of the viewport height */
-            transform: scale(1.12); /* Zoom in 112% */
-            transform-origin: top left; /* Adjust the zoom origin */
+            width: 100%;
+            height: 100%;
         }
         .fullscreen-button {
             position: absolute;
@@ -50,11 +49,16 @@
 
     <script>
         function toggleFullscreen() {
-            const elem = document.documentElement; // Full screen mode for the entire document
-            if (document.fullscreenElement) {
+            const pdfContainer = document.getElementById('pdfContainer');
+            const isFullscreen = !!document.fullscreenElement;
+
+            if (isFullscreen) {
                 document.exitFullscreen();
+                pdfContainer.style.transform = 'none'; // Reset zoom
             } else {
-                elem.requestFullscreen?.() || elem.mozRequestFullScreen?.() || elem.webkitRequestFullscreen?.() || elem.msRequestFullscreen?.();
+                document.documentElement.requestFullscreen?.() || document.documentElement.mozRequestFullScreen?.() || document.documentElement.webkitRequestFullscreen?.() || document.documentElement.msRequestFullscreen?.();
+                pdfContainer.style.transform = 'scale(1.12)'; // Apply zoom
+                pdfContainer.style.transformOrigin = 'center'; // Center the PDF
             }
         }
 
