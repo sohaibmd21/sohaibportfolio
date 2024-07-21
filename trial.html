@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sohaib Portfolio</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+        }
+        #pdfContainer {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+        canvas {
+            border: none;
+            width: 100%;
+            height: 100%;
+        }
+        .fullscreen-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            padding: 10px 20px;
+            background: #e50914;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        .fullscreen-button:hover {
+            background: #f40612;
+        }
+    </style>
+    <!-- Include PDF.js library -->
+    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+</head>
+<body>
+    <button class="fullscreen-button" onclick="toggleFullscreen()">Full Screen</button>
+    <div id="pdfContainer">
+        <canvas id="pdfCanvas"></canvas>
+    </div>
+
+    <script>
+        const url = 'Portfolio.pdf'; // Path to your PDF file
+
+        // PDF.js configuration
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://mozilla.github.io/pdf.js/build/pdf.worker.js';
+
+        let pdfDoc = null;
+        let pageNum = 1;
+        let pageRendering = false;
+        let pageNumPending = null;
+        const scale = 1.5; // Adjust scale as needed
+        const canvas = document.getElementById('pdfCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function renderPage(num, scale) {
+            pageRendering = true;
+
+            pdfDoc.getPage(num).then(function(page) {
+                const viewport = page.getViewport({ scale });
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                const renderContext = {
+                    canvasContext: ctx,
+                    viewport: viewport
+                };
+                const renderTask = page.render(renderContext);
+
+                renderTask.promise.then(function() {
+                    pageRendering = false;
+                    if (pageNumPending !== null) {
+                        renderPage(pageNumPending, scale);
+                        pageNumPending = null;
+                    }
+                });
+            });
+        }
+
+        function queueRenderPage(num) {
+            if (pageRendering) {
+                pageNumPending = num;
+            } else {
+                renderPage(num, scale);
+            }
+        }
+
+        function onDocumentLoad() {
+            pdfjsLib.getDocument(url).promise.then(function(pdf) {
+                pdfDoc = pdf;
+                renderPage(pageNum, scale);
+            }).catch(function(error) {
+                console.error('Error loading PDF:', error);
+            });
+        }
+
+        function toggleFullscreen() {
+            const pdfContainer = document.getElementById('pdfContainer');
+            const isFullscreen = !!document.fullscreenElement;
+
+            if (isFullscreen) {
+                document.exitFullscreen();
+                renderPage(pageNum, scale); // Render at normal scale
+            } else {
+                document.documentElement.requestFullscreen?.() || document.documentElement.mozRequestFullScreen?.() || document.documentElement.webkitRequestFullscreen?.() || document.documentElement.msRequestFullscreen?.();
+                renderPage(pageNum, scale * 1.5); // Render at higher scale for fullscreen
+            }
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            document.querySelector('.fullscreen-button').style.display = document.fullscreenElement ? 'none' : 'block';
+        });
+
+        document.addEventListener('DOMContentLoaded', onDocumentLoad);
+    </script>
+</body>
+</html>
