@@ -12,60 +12,75 @@
             overflow: hidden;
             background: #000;
         }
-        #pdfContainer {
+        #pdfViewer {
             position: absolute;
             inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.3s ease;
+            width: 100%;
+            height: 100%;
         }
-        object {
+        iframe {
             border: none;
             width: 100%;
             height: 100%;
         }
+        .fullscreen-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            padding: 10px 20px;
+            background: #e50914;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        .fullscreen-button:hover {
+            background: #f40612;
+        }
     </style>
 </head>
 <body>
-    <div id="pdfContainer">
-        <object id="pdfObject" data="Portfolio.pdf" type="application/pdf"></object>
+    <button class="fullscreen-button" onclick="toggleFullscreen()">Full Screen</button>
+    <div id="pdfViewer">
+        <iframe id="pdfIframe" src="web/viewer.html?file=Portfolio.pdf" type="application/pdf"></iframe>
     </div>
 
+    <!-- Include PDF.js and viewer scripts as ES modules -->
+    <script type="module">
+        import { PDFViewer } from './pdfjs/pdf.mjs';
+        import { PDFWorker } from './pdfjs/pdf.worker.mjs';
+        import { Viewer } from './web/viewer.js';
+
+        // Initialize PDF.js viewer
+        const viewer = new Viewer({
+            pdfjs: PDFViewer,
+            worker: PDFWorker
+        });
+
+        // Setup PDF viewer (You might need to adapt this based on your setup)
+        viewer.load('Portfolio.pdf');
+    </script>
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const pdfObject = document.getElementById('pdfObject');
+        function toggleFullscreen() {
+            const pdfViewer = document.getElementById('pdfViewer');
+            const isFullscreen = !!document.fullscreenElement;
 
-            document.addEventListener('keydown', function(event) {
-                if (pdfObject) {
-                    const iframe = pdfObject.contentDocument || pdfObject.contentWindow.document;
-                    if (iframe) {
-                        switch (event.key) {
-                            case 'ArrowRight':
-                            case 'ArrowDown':
-                                iframe.postMessage({ type: 'NEXT_PAGE' }, '*');
-                                break;
-                            case 'ArrowLeft':
-                            case 'ArrowUp':
-                                iframe.postMessage({ type: 'PREV_PAGE' }, '*');
-                                break;
-                        }
-                    }
-                }
-            });
-
-            let cursorTimeout;
-            function showCursor() {
-                document.body.style.cursor = 'auto';
-                clearTimeout(cursorTimeout);
-                cursorTimeout = setTimeout(() => {
-                    document.body.style.cursor = 'none';
-                }, 2000);
+            if (isFullscreen) {
+                document.exitFullscreen();
+                pdfViewer.style.transform = 'none'; // Reset zoom
+            } else {
+                document.documentElement.requestFullscreen?.() || document.documentElement.mozRequestFullScreen?.() || document.documentElement.webkitRequestFullscreen?.() || document.documentElement.msRequestFullscreen?.();
+                pdfViewer.style.transform = 'scale(1.12)'; // Apply zoom
+                pdfViewer.style.transformOrigin = 'center'; // Center the PDF
             }
+        }
 
-            document.addEventListener('mousemove', showCursor);
-            document.addEventListener('touchmove', showCursor);
-            document.addEventListener('touchstart', showCursor);
+        document.addEventListener('fullscreenchange', () => {
+            document.querySelector('.fullscreen-button').style.display = document.fullscreenElement ? 'none' : 'block';
         });
     </script>
 </body>
