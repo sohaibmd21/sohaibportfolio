@@ -21,7 +21,7 @@
             transition: transform 0.3s ease;
             touch-action: pinch-zoom; /* Enable pinch-to-zoom on touch devices */
         }
-        iframe {
+        canvas {
             border: none;
             width: 100%;
             height: 100%;
@@ -41,11 +41,13 @@
             background: #f40612;
         }
     </style>
+    <!-- Include PDF.js library -->
+    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
 </head>
 <body>
     <button class="fullscreen-button" onclick="toggleFullscreen()">Full Screen</button>
     <div id="pdfContainer">
-        <iframe id="pdfIframe" src="Portfolio.pdf" type="application/pdf"></iframe>
+        <canvas id="pdfCanvas"></canvas>
     </div>
 
     <script>
