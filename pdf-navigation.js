@@ -1,49 +1,62 @@
-// pdf-navigation.js
-
-// Handle cursor visibility
-let cursorTimeout;
-
-function showCursor() {
-    document.body.style.cursor = 'auto'; // Show cursor
-    clearTimeout(cursorTimeout); // Clear existing timeout
-    cursorTimeout = setTimeout(() => {
-        document.body.style.cursor = 'none'; // Hide cursor after 2 seconds
-    }, 2000);
-}
-
-document.addEventListener('mousemove', showCursor);
-document.addEventListener('touchmove', showCursor);
-
-// Ensure cursor is shown when interacting with the PDF container
-document.getElementById('pdfContainer').addEventListener('mousemove', showCursor);
-document.getElementById('pdfContainer').addEventListener('touchmove', showCursor);
-
-// PDF navigation
 document.addEventListener('DOMContentLoaded', () => {
-    const pdfIframe = document.getElementById('pdfIframe');
+    const pdfContainer = document.getElementById('pdfContainer');
+    let lastTouchDistance = null;
+    let cursorTimeout;
 
-    function navigatePdf(direction) {
-        if (pdfIframe) {
-            const currentUrl = new URL(pdfIframe.src, window.location.href);
-            const urlParams = new URLSearchParams(currentUrl.search);
-            const currentPage = parseInt(urlParams.get('page')) || 1;
+    // Handle keydown events for PDF navigation
+    document.addEventListener('keydown', function(event) {
+        const iframe = document.getElementById('pdfIframe');
+        if (iframe && iframe.contentWindow) {
+            switch (event.key) {
+                case 'ArrowRight':
+                case 'ArrowDown':
+                    iframe.contentWindow.postMessage({ type: 'NEXT_PAGE' }, '*');
+                    break;
+                case 'ArrowLeft':
+                case 'ArrowUp':
+                    iframe.contentWindow.postMessage({ type: 'PREV_PAGE' }, '*');
+                    break;
+            }
+        }
+    });
 
-            const newPage = Math.max(currentPage + direction, 1); // Ensure page number is at least 1
-            urlParams.set('page', newPage);
-            pdfIframe.src = `${currentUrl.pathname}?${urlParams.toString()}`;
+    // Show/hide cursor based on activity
+    function showCursor() {
+        document.body.style.cursor = 'auto'; // Show cursor
+        clearTimeout(cursorTimeout);
+        cursorTimeout = setTimeout(() => {
+            document.body.style.cursor = 'none'; // Hide cursor after 2 seconds
+        }, 2000);
+    }
+
+    document.addEventListener('mousemove', showCursor);
+    document.addEventListener('touchmove', showCursor);
+    pdfContainer.addEventListener('mousemove', showCursor);
+    pdfContainer.addEventListener('touchmove', showCursor);
+
+    // Handle pinch-to-zoom functionality
+    function handlePinchZoom(event) {
+        if (event.touches.length === 2) {
+            const x1 = event.touches[0].clientX;
+            const y1 = event.touches[0].clientY;
+            const x2 = event.touches[1].clientX;
+            const y2 = event.touches[1].clientY;
+
+            const currentDistance = Math.hypot(x2 - x1, y2 - y1);
+
+            if (lastTouchDistance !== null) {
+                const scale = currentDistance / lastTouchDistance;
+                const pdfContainer = document.getElementById('pdfContainer');
+                let currentScale = getComputedStyle(pdfContainer).transform.match(/matrix\(([^)]+)\)/);
+                currentScale = currentScale ? parseFloat(currentScale[1].split(',')[0]) : 1;
+                pdfContainer.style.transform = `scale(${currentScale * scale})`;
+            }
+
+            lastTouchDistance = currentDistance;
+        } else {
+            lastTouchDistance = null;
         }
     }
 
-    document.addEventListener('keydown', (event) => {
-        switch (event.key) {
-            case 'ArrowLeft': // Navigate to previous page
-            case 'ArrowUp':   // Navigate to previous page
-                navigatePdf(-1);
-                break;
-            case 'ArrowRight': // Navigate to next page
-            case 'ArrowDown':  // Navigate to next page
-                navigatePdf(1);
-                break;
-        }
-    });
+    pdfContainer.addEventListener('touchmove', handlePinchZoom);
 });
