@@ -48,23 +48,42 @@
         <iframe id="pdfIframe" src="web/viewer.html?file=Portfolio.pdf" type="application/pdf"></iframe>
     </div>
 
-    <!-- Include PDF.js and viewer scripts as ES modules -->
-    <script type="module">
-        import { PDFViewer } from './pdfjs/pdf.mjs';
-        import { PDFWorker } from './pdfjs/pdf.worker.mjs';
-        import { Viewer } from './web/viewer.mjs';
-
-        // Initialize PDF.js viewer
-        const viewer = new Viewer({
-            pdfjs: PDFViewer,
-            worker: PDFWorker
-        });
-
-        // Setup PDF viewer (You might need to adapt this based on your setup)
-        viewer.load('Portfolio.pdf');
-    </script>
+    <!-- Include PDF.js and viewer scripts from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.0.0/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.0.0/pdf.worker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.0.0/pdf_viewer.min.js"></script>
 
     <script>
+        // Initialize PDF.js viewer
+        const url = 'Portfolio.pdf';
+
+        // Load the PDF document
+        pdfjsLib.getDocument(url).promise.then(pdf => {
+            // Fetch the first page
+            pdf.getPage(1).then(page => {
+                const scale = 1.5;
+                const viewport = page.getViewport({ scale });
+
+                // Prepare canvas using PDF page dimensions
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                // Append canvas to the viewer
+                const pdfViewer = document.getElementById('pdfViewer');
+                pdfViewer.innerHTML = '';
+                pdfViewer.appendChild(canvas);
+
+                // Render PDF page into canvas context
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                page.render(renderContext);
+            });
+        });
+
         function toggleFullscreen() {
             const pdfViewer = document.getElementById('pdfViewer');
             const isFullscreen = !!document.fullscreenElement;
