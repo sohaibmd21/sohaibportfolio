@@ -43,7 +43,7 @@
 
     <script>
         function openFullscreen() {
-            var elem = document.getElementById("pdfContainer");
+            var elem = document.querySelector("#pdfContainer embed");
             if (elem.requestFullscreen) {
                 elem.requestFullscreen();
             } else if (elem.mozRequestFullScreen) { // Firefox
