@@ -20,10 +20,10 @@
             justify-content: center;
             transition: transform 0.3s ease;
         }
-        iframe {
-            border: none;
+        #pdfViewer {
             width: 100%;
             height: 100%;
+            overflow: hidden;
         }
         .fullscreen-button {
             position: absolute;
@@ -40,31 +40,16 @@
             background: #f40612;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf_viewer.min.js"></script>
 </head>
 <body>
     <button class="fullscreen-button" onclick="toggleFullscreen()">Full Screen</button>
     <div id="pdfContainer">
-        <iframe id="pdfIframe" src="Portfolio.pdf" type="application/pdf"></iframe>
+        <div id="pdfViewer"></div>
     </div>
 
-    <script>
-        function toggleFullscreen() {
-            const pdfContainer = document.getElementById('pdfContainer');
-            const isFullscreen = !!document.fullscreenElement;
-
-            if (isFullscreen) {
-                document.exitFullscreen();
-                pdfContainer.style.transform = 'none'; // Reset zoom
-            } else {
-                document.documentElement.requestFullscreen?.() || document.documentElement.mozRequestFullScreen?.() || document.documentElement.webkitRequestFullscreen?.() || document.documentElement.msRequestFullscreen?.();
-                pdfContainer.style.transform = 'scale(1.12)'; // Apply zoom
-                pdfContainer.style.transformOrigin = 'center'; // Center the PDF
-            }
-        }
-
-        document.addEventListener('fullscreenchange', () => {
-            document.querySelector('.fullscreen-button').style.display = document.fullscreenElement ? 'none' : 'block';
-        });
-    </script>
+    <!-- Link to the external JavaScript file -->
+    <script src="pdf-controls.js"></script>
 </body>
 </html>
